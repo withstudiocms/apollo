@@ -1,0 +1,27 @@
+{
+  "name": "studiocms-bot",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx --env-file=.env tsx ./src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@libsql/client": "^0.14.0",
+    "bufferutil": "^4.0.8",
+    "consola": "^3.2.3",
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.36.4",
+    "zlib-sync": "^0.1.9"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.28.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
