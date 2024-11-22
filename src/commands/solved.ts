@@ -2,13 +2,12 @@ import { BRAND_COLOR } from "@/consts";
 import { createId } from "@/utils/createId";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ChatInputCommandInteraction, ComponentType, EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 
-
 /**
  * `/solved` command handler.
  * @param interaction The interaction event from discord
  */
 const handler = async (interaction: ChatInputCommandInteraction) => {
-  if (!interaction.channel) return;
+  if (!interaction.channel || !interaction.guild) return;
 
   if (interaction.channel.type !== ChannelType.PublicThread) {
     await interaction.reply({
