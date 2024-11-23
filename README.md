@@ -45,7 +45,7 @@ pnpm start
 ```
 
 ## Contributing
-See our [Contribution Guide](https://github.com/withstudiocms/apollo/).
+See our [Contribution Guide](https://github.com/withstudiocms/apollo/blob/main/CONTRIBUTING.md).
 
 ## License
 
