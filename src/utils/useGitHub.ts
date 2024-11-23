@@ -1,6 +1,5 @@
 import { App, Octokit } from "octokit";
 import 'dotenv/config';
-import jwt from "jsonwebtoken";
 
 let octokit: Octokit | undefined;
 

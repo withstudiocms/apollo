@@ -7,25 +7,25 @@ import { useDB } from './utils/useDB';
 import { guildsTable } from './db/schema';
 import { startActivityCycle } from './activities';
 
-if (!process.env.TOKEN) {
-  throw new Error("TOKEN env must be set!");
+if (!process.env.DISCORD_APP_TOKEN) {
+  throw new Error("DISCORD_APP_TOKEN env must be set!");
 }
 
-if (!process.env.CLIENT_ID) {
-  throw new Error("CLIENT_ID env must be set!");
+if (!process.env.DISCORD_CLIENT_ID) {
+  throw new Error("DISCORD_CLIENT_ID env must be set!");
 }
 
 const client = new Client({ 
   intents: [GatewayIntentBits.Guilds],
 });
 
-const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
+const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_APP_TOKEN);
 
 try {
   consola.info('Started refreshing application (/) commands.');
 
   await rest.put(
-    Routes.applicationCommands(process.env.CLIENT_ID), 
+    Routes.applicationCommands(process.env.DISCORD_CLIENT_ID), 
     { body: commands.map((x) => x.builder) } 
   );
 
@@ -62,4 +62,4 @@ client.on('guildCreate', async (guild) => {
   });
 });
 
-client.login(process.env.TOKEN);
+client.login(process.env.DISCORD_APP_TOKEN);

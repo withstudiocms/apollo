@@ -17,6 +17,9 @@ interface ApolloActivity {
   details?: string;
 };
 
+/**
+ * Maps json activity types to Discord enum
+ */
 const apolloActivityTypeMap = new Map<ActivityType, DiscordActivityType>([
   ['competing', DiscordActivityType.Competing],
   ['listening', DiscordActivityType.Listening],
@@ -26,12 +29,15 @@ const apolloActivityTypeMap = new Map<ActivityType, DiscordActivityType>([
   ['custom', DiscordActivityType.Custom],
 ]);
 
+/**
+ * Maps Discord activity enums to respective labels
+ */
 const discordActivityTypeStrings = new Map<DiscordActivityType, string>([
-  [DiscordActivityType.Competing, "Competing in"],
-  [DiscordActivityType.Listening, "Listening to"],
-  [DiscordActivityType.Playing, "Playing"],
-  [DiscordActivityType.Streaming, "Streaming"],
-  [DiscordActivityType.Watching, "Watching"],
+  [DiscordActivityType.Competing, "Competing in "],
+  [DiscordActivityType.Listening, "Listening to "],
+  [DiscordActivityType.Playing, "Playing "],
+  [DiscordActivityType.Streaming, "Streaming "],
+  [DiscordActivityType.Watching, "Watching "],
   [DiscordActivityType.Custom, ""],
 ]);
 
@@ -94,7 +100,7 @@ const startActivityCycle = async (client: Client, duration = 45_000) => {
     const presence = client.user.setActivity(parseActivity(activity));
     const activityInfo = presence.activities[0];
 
-    consola.info(`Activity set to "${discordActivityTypeStrings.get(activityInfo.type)!.trim()} ${activityInfo.name}"`);
+    consola.info(`Activity set to "${discordActivityTypeStrings.get(activityInfo.type)!}${activityInfo.name}"`);
 
     await new Promise((resolve) => setTimeout(resolve, duration));
   }

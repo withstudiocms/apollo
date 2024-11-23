@@ -1,3 +1,8 @@
+/**
+ * Returns a given array in a random order
+ * @param array The array to shuffle
+ * @returns The shuffled arary
+ */
 const shuffle = <T extends any[]>(array: T): T[number][] => {
   let currentIndex = array.length;
 

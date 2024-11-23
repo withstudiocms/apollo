@@ -3,7 +3,7 @@ export type For = (
   'mentionable' |
   'select' |
   'modal'
-)
+);
 
 /**
  * Creates an ID based on 3 parameters so that it can be unique.
