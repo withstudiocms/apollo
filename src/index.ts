@@ -5,6 +5,7 @@ import consola from 'consola';
 import { commands } from './commands';
 import { useDB } from './utils/useDB';
 import { guildsTable } from './db/schema';
+import { startActivityCycle } from './activities';
 
 if (!process.env.TOKEN) {
   throw new Error("TOKEN env must be set!");
@@ -14,7 +15,10 @@ if (!process.env.CLIENT_ID) {
   throw new Error("CLIENT_ID env must be set!");
 }
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ 
+  intents: [GatewayIntentBits.Guilds],
+});
+
 const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
 try {
@@ -36,6 +40,8 @@ client.on('ready', () => {
   };
 
   consola.info(`Logged in as ${client.user.tag}!`);
+
+  startActivityCycle(client);
 });
 
 client.on('interactionCreate', async (interaction) => {

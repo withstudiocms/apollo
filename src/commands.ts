@@ -3,6 +3,7 @@ import { ChatInputCommandInteraction, Collection, SlashCommandBuilder } from "di
 import solved from "./commands/solved";
 import settings from "./commands/settings";
 import support from "./commands/support";
+import ptal from "./commands/ptal";
 
 export type Command = {
   builder: SlashCommandBuilder;
@@ -14,5 +15,6 @@ const commands = new Collection<string, Command>();
 commands.set(solved.builder.name, solved);
 commands.set(settings.builder.name, settings);
 commands.set(support.builder.name, support);
+commands.set(ptal.builder.name, ptal);
 
 export { commands };

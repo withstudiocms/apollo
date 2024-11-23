@@ -13,8 +13,12 @@ import { eq } from "drizzle-orm";
 const formatValueBasedOnKey = (key: GuildsMapKey, value: string | null): string => {
   if (!value) return "*Unset*";
 
-  if (key === 'forum_channel' || key === 'ptal_channel') {
+  if (key === 'forum_channel') {
     return `<#${value}>`;
+  }
+
+  if (key === 'ptal_announcement_role') {
+    return `<@&${value}>`;
   }
 
   return "*Unsets*";
@@ -41,6 +45,19 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
     await interaction.reply({
       ephemeral: true,
       content: "Channel configured successfully."
+    });
+  }
+
+  if (subcommand === 'set-ptal-role') {
+    const role = interaction.options.getRole('role', true);
+    
+    await db.update(guildsTable)
+      .set({ ptal_announcement_role: role.id })
+      .where(eq(guildsTable.id, interaction.guild.id));
+
+    await interaction.reply({
+      ephemeral: true,
+      content: "Role configured successfully."
     });
   }
 
@@ -78,6 +95,19 @@ command
       option.addChannelTypes(ChannelType.GuildForum);
       option.setName("forum");
       option.setDescription("The channel where support requests are answered.");
+      option.setRequired(true);
+  
+      return option;
+    });
+
+    return subcommand;
+  })
+  .addSubcommand((subcommand) => {
+    subcommand.setName("set-ptal-role");
+    subcommand.setDescription("Sets the role that gets pinged when a new PTAL is sent.");
+    subcommand.addRoleOption((option) => {
+      option.setName("role");
+      option.setDescription("The role that should get pinged.");
       option.setRequired(true);
   
       return option;

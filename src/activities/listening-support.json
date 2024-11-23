@@ -1,0 +1,5 @@
+{
+  "$schema": "../activities.schema.json",
+  "type": "listening",
+  "name": "Support Requests"
+}
