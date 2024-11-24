@@ -68,6 +68,7 @@ async function handlePullRequestChange(pr: PullRequestCallback) {
 const middleware = createNodeMiddleware(webhooks);
 
 createServer(async (req, res) =>  {
+  console.log(req);
   if (await middleware(req, res)) return;
   res.writeHead(404);
   res.end();
