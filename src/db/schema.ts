@@ -8,7 +8,7 @@ export const guildsTable = sqliteTable("guilds", {
 
 export const ptalTable = sqliteTable("ptals", {
   id: int().primaryKey({ autoIncrement: true }),
-  channel: text().notNull().unique(),
+  channel: text().notNull(),
   message: text().notNull().unique(),
   repository: text().notNull(),
   owner: text().notNull(),
