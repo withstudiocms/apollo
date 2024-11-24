@@ -50,7 +50,7 @@ TURSO_AUTH_TOKEN=... # Optional, only if you have an auth token! Not needed for 
 The `/ptal` command is powered by the GitHub API, for which you need to create a GitHub
 App and install it in your organization, for yourself or for a specific repository.
 
-You'll get the App ID and Client ID as soon as you create the app, the private key you
+You'll get the App ID, Client ID and Client Secret as soon as you create the app, the private key you
 need to add manually. You also need to generate it yourself. The easiest way of doing so
 is by running the following command in your terminal (requires OpenSSL to be installed):
 
@@ -65,6 +65,7 @@ for this.
 ```env
 GITHUB_APP_ID=...
 GITHUB_CLIENT_ID=...
+GITHUB_CLIENT_SECRET=...
 GITHUB_INSTALLATION_ID=...
 GITHUB_PRIVATE_KEY="
 -----BEGIN RSA PRIVATE KEY-----

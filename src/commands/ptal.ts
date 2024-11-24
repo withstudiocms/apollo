@@ -264,19 +264,29 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
   async function handlePullRequestChange(pr: PullRequestCallback) {
     if (pr.payload.repository.name !== repo || pr.payload.number !== prNumber) return;
 
-    const { embed, message } = await makePtalEmbed(
-      pr.payload.pull_request as PullRequest,
-      reviewList,
-      interaction
-    );
+    try {
+      const reviewList = await octokit.rest.pulls.listReviews({
+        owner,
+        repo,
+        pull_number: prNumber,
+      });
 
-    await reply.edit({
-      content: message,
-      embeds: [embed],
-    });
-
-    if (pr.payload.pull_request.merged) {
-      app.webhooks.removeListener('pull_request', handlePullRequestChange);
+      const { embed, message } = await makePtalEmbed(
+        pr.payload.pull_request as PullRequest,
+        reviewList.data,
+        interaction
+      );
+  
+      await reply.edit({
+        content: message,
+        embeds: [embed],
+      });
+  
+      if (pr.payload.pull_request.merged) {
+        app.webhooks.removeListener('pull_request', handlePullRequestChange);
+      }
+    } catch (err) {
+      console.error(err);
     }
   }
 }

@@ -12,6 +12,9 @@ export const useGitHub = async (): Promise<{ octokit: Octokit, app: App }> => {
     app = new App({
       appId: process.env.GITHUB_APP_ID,
       privateKey: process.env.GITHUB_PRIVATE_KEY,
+      webhooks: {
+        secret: process.env.GITHUB_CLIENT_SECRET,
+      }
     });
 
     octokit = await app.getInstallationOctokit(Number.parseInt(process.env.GITHUB_INSTALLATION_ID));
