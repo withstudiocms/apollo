@@ -87,7 +87,7 @@ const command = new SlashCommandBuilder();
 
 command
   .setName('settings')
-  .setDescription('Allows you to configure the bots settings.')
+  .setDescription('Command which carries the sub-commands for configuring the bot.')
   .addSubcommand((subcommand) => {
     subcommand.setName("set-forum");
     subcommand.setDescription("Sets the support form.");
@@ -104,7 +104,7 @@ command
   })
   .addSubcommand((subcommand) => {
     subcommand.setName("set-ptal-role");
-    subcommand.setDescription("Sets the role that gets pinged when a new PTAL is sent.");
+    subcommand.setDescription("Sets the role that gets pinged when a new PTAL announcement is sent.");
     subcommand.addRoleOption((option) => {
       option.setName("role");
       option.setDescription("The role that should get pinged.");

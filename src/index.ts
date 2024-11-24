@@ -6,13 +6,12 @@ import { commands } from './commands';
 import { useDB } from './utils/useDB';
 import { guildsTable } from './db/schema';
 import { startActivityCycle } from './activities';
+import { checkRequiredENVs } from './utils/checkRequiredENVs';
 
-if (!process.env.DISCORD_APP_TOKEN) {
-  throw new Error("DISCORD_APP_TOKEN env must be set!");
-}
+const { valid, message } = checkRequiredENVs();
 
-if (!process.env.DISCORD_CLIENT_ID) {
-  throw new Error("DISCORD_CLIENT_ID env must be set!");
+if (!valid) {
+  throw new Error(message);
 }
 
 const client = new Client({ 

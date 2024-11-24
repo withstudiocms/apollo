@@ -1,4 +1,4 @@
-# Contribution Guuide
+# Contribution Guide
 
 ⚠️ WIP
 

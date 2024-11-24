@@ -8,7 +8,7 @@ export const useDB = () => {
   const client = drizzle({ 
     connection: {
       url: process.env.TURSO_URL!, 
-      authToken: process.env.TURSO_AUTH_TOKEN!
+      authToken: process.env.TURSO_AUTH_TOKEN
     }
   });
 

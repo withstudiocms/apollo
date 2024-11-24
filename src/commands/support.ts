@@ -52,7 +52,7 @@ const command = new SlashCommandBuilder();
 
 command
   .setName('support')
-  .setDescription('Creates a new post in the support forum based on the message you reply to.')
+  .setDescription('Creates a new post in the support forum based on the message you supply.')
   .addStringOption((option) => {
     option.setName("title");
     option.setDescription("The title of the new post.");

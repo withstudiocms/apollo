@@ -9,6 +9,9 @@ import { Octokit } from "octokit";
 
 type PullRequestState = 'draft' | 'waiting' | 'approved' | 'changes' | 'merged';
 
+type PullRequest = Awaited<ReturnType<Octokit['rest']['pulls']['get']>>['data'];
+type PullRequestReplies = Awaited<ReturnType<Octokit['rest']['pulls']['listReviews']>>['data'];
+
 /**
  * Map for converting a PR state to the matching Discord label
  */
@@ -73,8 +76,8 @@ const convertStateToStatus = (status: string): ReviewStatus => {
  * @returns A pull request state
  */
 const computePullRequestStatus = (
-  pr: Awaited<ReturnType<Octokit['rest']['pulls']['get']>>['data'],
-  reviews: Awaited<ReturnType<Octokit['rest']['pulls']['listReviews']>>['data'],
+  pr: PullRequest,
+  reviews: PullRequestReplies,
 ): PullRequestState => {
   if (pr.draft) {
     return "draft";
@@ -99,6 +102,53 @@ const computePullRequestStatus = (
   return "waiting";
 }
 
+const makePtalEmbed = async (
+  pr: PullRequest,
+  reviewList: PullRequestReplies,
+  interaction: ChatInputCommandInteraction,
+) => {
+  const db = useDB();
+  const data = await db.select().from(guildsTable).where(eq(guildsTable.id, interaction.guild!.id));
+  const role = data[0].ptal_announcement_role;
+
+  const description = interaction.options.get("description", true);
+  const pullRequestUrl = new URL(interaction.options.get("github", true).value as string);
+
+  const splitPath = pullRequestUrl.pathname.split("/pull/");
+  const [owner, repo] = splitPath[0].slice(1).split("/");
+  const prNumber = Number.parseInt(splitPath[1]);
+
+  const {
+    reviews,
+    status,
+    title
+  } = parsePullRequest(pr, reviewList.filter((review) => review.user?.name?.includes("[bot]")));
+
+  const role_ping = role ? `<@&${role}>\n\n` : '';
+  const repoPlusPullRequestId = `${owner}/${repo}#${prNumber}`;
+
+  let message = `${role_ping}# PTAL / Ready for Review\n\n${description.value}`;
+
+  const embed = new EmbedBuilder({
+    author: {
+      icon_url: interaction.user.avatarURL({ size: 64 }) || interaction.user.defaultAvatarURL,
+      name: interaction.member!.user.username,
+    },
+    color: BRAND_COLOR,
+    fields: [
+      { name: "Repository", value: `[${repoPlusPullRequestId}](${pullRequestUrl.toString()})` },
+      { name: "Status", value: status.label },
+      { name: "Reviews", value: reviews.map((review) => (
+        `${getReviewEmoji(review.status)} [@${review.author}](https://github.com/${review.author})`
+      )).join("\n") || "*No reviews yet*" }
+    ],
+    timestamp: Date.now(),
+    title,
+  });
+
+  return { embed, message };
+}
+
 /**
  * Takes in a PR and parses it for easy use in the Discord API.
  * @param pr The pr response data
@@ -106,8 +156,8 @@ const computePullRequestStatus = (
  * @returns Parsed data
  */
 const parsePullRequest = (
-  pr: Awaited<ReturnType<Octokit['rest']['pulls']['get']>>['data'],
-  reviews: Awaited<ReturnType<Octokit['rest']['pulls']['listReviews']>>['data'],
+  pr: PullRequest,
+  reviews: PullRequestReplies,
 ): ParsedPR => {
   let status = computePullRequestStatus(pr, reviews);
 
@@ -138,10 +188,8 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
     return;
   };
 
-  const db = useDB();
-  const octokit = await useGitHub();
+  const { octokit, app } = await useGitHub();
   const pullRequestUrl = new URL(interaction.options.get("github", true).value as string);
-  const description = interaction.options.get("description", true);
 
   if (pullRequestUrl.origin !== "https://github.com" || !pullRequestUrl.pathname.includes("/pull/")) {
     await interaction.reply({
@@ -152,25 +200,12 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
     return;
   }
 
-  const data = await db.select().from(guildsTable).where(eq(guildsTable.id, interaction.guild.id));
-  const role = data[0].ptal_announcement_role;
   const splitPath = pullRequestUrl.pathname.split("/pull/");
   const [owner, repo] = splitPath[0].slice(1).split("/");
   const prNumber = Number.parseInt(splitPath[1]);
 
-  if (owner !== process.env.GITHUB_USERNAME_OR_ORG) {
-    await interaction.reply({
-      ephemeral: true,
-      content: "PR must be from a repo that belongs to the configured user or organization!"
-    });
-
-    return;
-  }
-
-  const repoPlusPullRequestId = `${owner}/${repo}#${prNumber}`;
-
-  let pr: Awaited<ReturnType<Octokit['rest']['pulls']['get']>>['data'];
-  let reviewList: Awaited<ReturnType<Octokit['rest']['pulls']['listReviews']>>['data'];
+  let pr: PullRequest;
+  let reviewList: PullRequestReplies;
 
   try {
     const [prRes, reviewListRes] = await Promise.all([
@@ -208,37 +243,27 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
     return;
   }
 
-  const {
-    reviews,
-    status,
-    title
-  } = parsePullRequest(pr, reviewList.filter((review) => review.user?.name?.includes("[bot]")));
+  const { embed, message } = await makePtalEmbed(pr, reviewList, interaction);
 
-  const role_ping = role ? `<@&${role}>\n\n` : '';
-
-  let message = `${role_ping}# PTAL / Ready for Review\n\n${description.value}`;
-
-  const embed = new EmbedBuilder({
-    author: {
-      icon_url: interaction.user.avatarURL({ size: 64 }) || interaction.user.defaultAvatarURL,
-      name: interaction.member.user.username,
-    },
-    color: BRAND_COLOR,
-    fields: [
-      { name: "Repository", value: `[${repoPlusPullRequestId}](${pullRequestUrl.toString()})` },
-      { name: "Status", value: status.label },
-      { name: "Reviews", value: reviews.map((review) => (
-        `${getReviewEmoji(review.status)} [@${review.author}](https://github.com/${review.author})`
-      )).join("\n") || "*No reviews yet*" }
-    ],
-    timestamp: Date.now(),
-    title,
-  });
-
-  await interaction.reply({
+  const reply = await interaction.reply({
     content: message,
     embeds: [embed],
     allowedMentions: { parse: [] },
+  });
+
+  app.webhooks.on('pull_request', async (pr) => {
+    if (pr.payload.repository.name !== repo || pr.payload.number !== prNumber) return;
+
+    const { embed, message } = await makePtalEmbed(
+      pr.payload.pull_request as PullRequest,
+      reviewList,
+      interaction
+    );
+
+    reply.edit({
+      content: message,
+      embeds: [embed],
+    });
   });
 }
 
@@ -246,7 +271,7 @@ const command = new SlashCommandBuilder();
 
 command
   .setName('ptal')
-  .setDescription('Create a new PTAL notification.')
+  .setDescription('Creates a PTAL announcement in the current channel and pings the notifications role (if configured).')
   .addStringOption((option) => {
     option.setName('github');
     option.setDescription("A link to the GitHub PR.");
