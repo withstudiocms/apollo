@@ -70,6 +70,14 @@ const middleware = createNodeMiddleware(webhooks);
 const server = createServer(async (req, res) =>  {
   console.log("Request received:", req);
   if (await middleware(req, res)) return;
+
+  if (req.url === '/') {
+    res.writeHead(200);
+    res.end();
+    
+    return;
+  }
+
   res.writeHead(404);
   res.end();
 });
