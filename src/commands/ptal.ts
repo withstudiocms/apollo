@@ -5,7 +5,7 @@ import { useGitHub } from "@/utils/useGitHub";
 import consola from "consola";
 import { ChatInputCommandInteraction, EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { eq } from "drizzle-orm";
-import { Octokit } from "octokit";
+import { App, Octokit } from "octokit";
 
 type PullRequestState = 'draft' | 'waiting' | 'approved' | 'changes' | 'merged';
 
@@ -102,6 +102,13 @@ const computePullRequestStatus = (
   return "waiting";
 }
 
+/**
+ * Creates an embed and message to be used in the PTAL notifications.
+ * @param pr The PR to base the embed on
+ * @param reviewList The reviews for the PR
+ * @param interaction The discord.js interaction to reply to
+ * @returns The embed and message for the PTAL notification
+ */
 const makePtalEmbed = async (
   pr: PullRequest,
   reviewList: PullRequestReplies,
@@ -251,7 +258,10 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
     allowedMentions: { parse: [] },
   });
 
-  app.webhooks.on('pull_request', async (pr) => {
+  app.webhooks.on('pull_request', handlePullRequestChange);
+
+  type PullRequestCallback = Parameters<Parameters<typeof app.webhooks.on<'pull_request'>>[1]>[0];
+  async function handlePullRequestChange(pr: PullRequestCallback) {
     if (pr.payload.repository.name !== repo || pr.payload.number !== prNumber) return;
 
     const { embed, message } = await makePtalEmbed(
@@ -260,11 +270,15 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
       interaction
     );
 
-    reply.edit({
+    await reply.edit({
       content: message,
       embeds: [embed],
     });
-  });
+
+    if (pr.payload.pull_request.merged) {
+      app.webhooks.removeListener('pull_request', handlePullRequestChange);
+    }
+  }
 }
 
 const command = new SlashCommandBuilder();

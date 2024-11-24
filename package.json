@@ -18,7 +18,8 @@
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.36.4",
     "octokit": "^4.0.2",
-    "zlib-sync": "^0.1.9"
+    "zlib-sync": "^0.1.9",
+    "@octokit/webhooks": "^13.4.1"
   },
   "devDependencies": {
     "drizzle-kit": "^0.28.1",
