@@ -4,7 +4,7 @@ import { useDB } from "@/utils/useDB";
 import { useGitHub } from "@/utils/useGitHub";
 import { Webhooks, createNodeMiddleware } from "@octokit/webhooks";
 import { and, eq } from "drizzle-orm";
-import { createServer } from "node:https";
+import { createServer } from "node:http";
 import { client } from "../index";
 import { ChannelType } from "discord.js";
 
@@ -65,4 +65,10 @@ async function handlePullRequestChange(pr: PullRequestCallback) {
   }
 }
 
-createServer(createNodeMiddleware(webhooks)).listen(3000);
+const middleware = createNodeMiddleware(webhooks);
+
+createServer(async (req, res) =>  {
+  if (await middleware(req, res)) return;
+  res.writeHead(404);
+  res.end();
+}).listen(3000);
