@@ -7,6 +7,7 @@ import { useDB } from './utils/useDB';
 import { guildsTable } from './db/schema';
 import { startActivityCycle } from './activities';
 import { checkRequiredENVs } from './utils/checkRequiredENVs';
+import { server } from './server/webhooks';
 
 const { valid, message } = checkRequiredENVs();
 
@@ -62,5 +63,7 @@ client.on('guildCreate', async (guild) => {
 });
 
 client.login(process.env.DISCORD_APP_TOKEN);
+
+server.listen(3000);
 
 export { client };
