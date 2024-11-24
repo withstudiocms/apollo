@@ -1,15 +1,15 @@
 import { BRAND_COLOR } from "@/consts";
-import { guildsTable } from "@/db/schema";
+import { guildsTable, ptalTable } from "@/db/schema";
 import { useDB } from "@/utils/useDB";
 import { useGitHub } from "@/utils/useGitHub";
 import consola from "consola";
 import { ChatInputCommandInteraction, EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { eq } from "drizzle-orm";
-import { App, Octokit } from "octokit";
+import { Octokit } from "octokit";
 
 type PullRequestState = 'draft' | 'waiting' | 'approved' | 'changes' | 'merged';
 
-type PullRequest = Awaited<ReturnType<Octokit['rest']['pulls']['get']>>['data'];
+export type PullRequest = Awaited<ReturnType<Octokit['rest']['pulls']['get']>>['data'];
 type PullRequestReplies = Awaited<ReturnType<Octokit['rest']['pulls']['listReviews']>>['data'];
 
 /**
@@ -109,17 +109,17 @@ const computePullRequestStatus = (
  * @param interaction The discord.js interaction to reply to
  * @returns The embed and message for the PTAL notification
  */
-const makePtalEmbed = async (
+export const makePtalEmbed = async (
   pr: PullRequest,
   reviewList: PullRequestReplies,
-  interaction: ChatInputCommandInteraction,
+  description: string,
+  pullRequestUrl: URL,
+  user: ChatInputCommandInteraction['user'],
+  guildId: string
 ) => {
   const db = useDB();
-  const data = await db.select().from(guildsTable).where(eq(guildsTable.id, interaction.guild!.id));
+  const data = await db.select().from(guildsTable).where(eq(guildsTable.id, guildId));
   const role = data[0].ptal_announcement_role;
-
-  const description = interaction.options.get("description", true);
-  const pullRequestUrl = new URL(interaction.options.get("github", true).value as string);
 
   const splitPath = pullRequestUrl.pathname.split("/pull/");
   const [owner, repo] = splitPath[0].slice(1).split("/");
@@ -134,12 +134,12 @@ const makePtalEmbed = async (
   const role_ping = role ? `<@&${role}>\n\n` : '';
   const repoPlusPullRequestId = `${owner}/${repo}#${prNumber}`;
 
-  let message = `${role_ping}# PTAL / Ready for Review\n\n${description.value}`;
+  let message = `${role_ping}# PTAL / Ready for Review\n\n${description}`;
 
   const embed = new EmbedBuilder({
     author: {
-      icon_url: interaction.user.avatarURL({ size: 64 }) || interaction.user.defaultAvatarURL,
-      name: interaction.member!.user.username,
+      icon_url: user.avatarURL({ size: 64 }) || user.defaultAvatarURL,
+      name: user.username,
     },
     color: BRAND_COLOR,
     fields: [
@@ -195,7 +195,9 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
     return;
   };
 
-  const { octokit, app } = await useGitHub();
+  const octokit = await useGitHub();
+
+  const description = interaction.options.get("description", true).value as string;
   const pullRequestUrl = new URL(interaction.options.get("github", true).value as string);
 
   if (pullRequestUrl.origin !== "https://github.com" || !pullRequestUrl.pathname.includes("/pull/")) {
@@ -250,7 +252,8 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
     return;
   }
 
-  const { embed, message } = await makePtalEmbed(pr, reviewList, interaction);
+
+  const { embed, message } = await makePtalEmbed(pr, reviewList, description, pullRequestUrl, interaction.user, interaction.guild!.id);
 
   const reply = await interaction.reply({
     content: message,
@@ -258,37 +261,17 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
     allowedMentions: { parse: [] },
   });
 
-  app.webhooks.on('pull_request', handlePullRequestChange);
+  if (!reply.interaction.channel) return;
 
-  type PullRequestCallback = Parameters<Parameters<typeof app.webhooks.on<'pull_request'>>[1]>[0];
-  async function handlePullRequestChange(pr: PullRequestCallback) {
-    if (pr.payload.repository.name !== repo || pr.payload.number !== prNumber) return;
-
-    try {
-      const reviewList = await octokit.rest.pulls.listReviews({
-        owner,
-        repo,
-        pull_number: prNumber,
-      });
-
-      const { embed, message } = await makePtalEmbed(
-        pr.payload.pull_request as PullRequest,
-        reviewList.data,
-        interaction
-      );
-  
-      await reply.edit({
-        content: message,
-        embeds: [embed],
-      });
-  
-      if (pr.payload.pull_request.merged) {
-        app.webhooks.removeListener('pull_request', handlePullRequestChange);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }
+  const db = useDB();
+  await db.insert(ptalTable).values({
+    channel: reply.interaction.channel.id,
+    description: description,
+    message: reply.id,
+    owner,
+    repository: repo,
+    pr: prNumber,
+  });
 }
 
 const command = new SlashCommandBuilder();

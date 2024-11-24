@@ -62,3 +62,5 @@ client.on('guildCreate', async (guild) => {
 });
 
 client.login(process.env.DISCORD_APP_TOKEN);
+
+export { client };
