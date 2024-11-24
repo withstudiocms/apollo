@@ -4,7 +4,7 @@ import { useDB } from "@/utils/useDB";
 import { useGitHub } from "@/utils/useGitHub";
 import { Webhooks, createNodeMiddleware } from "@octokit/webhooks";
 import { and, eq } from "drizzle-orm";
-import { createServer } from "node:http";
+import { createServer } from "node:https";
 import { client } from "../index";
 import { ChannelType } from "discord.js";
 
