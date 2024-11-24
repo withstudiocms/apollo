@@ -93,7 +93,7 @@ const command = new SlashCommandBuilder();
 
 command
   .setName('solved')
-  .setDescription('Sends an embed with buttons so the OP of a support request can close it. Only works in a forum channel.')
+  .setDescription('Sends an embed with buttons so the OP of a support request can close it.')
   .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers);
 
 export default {

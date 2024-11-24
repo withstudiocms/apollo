@@ -107,7 +107,7 @@ docker run --detach "apollo"
 | `/settings set-forum`     | Allows you to configure the Forum to be used for support requests.                                      | Administrator       |
 | `/settings set-ptal-role` | Sets the role that gets pinged when a new PTAL announcement is sent.                                    | Administrator       |
 | `/settings print`         | Prints an overview of all settings.                                                                     | Administrator       |
-| `/solved`                 | Sends an embed with buttons so the OP of a support request can close it. Only works in a forum channel. | Moderate Members    |
+| `/solved`                 | Sends an embed with buttons so the OP of a support request can close it. | Moderate Members    |
 | `/support`                | Creates a new post in the support forum based on the message you supply.                                | Moderate Members    |
 
 ## Contributing
