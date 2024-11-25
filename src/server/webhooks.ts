@@ -80,7 +80,9 @@ async function handlePullRequestChange(pr: PullRequestCallback) {
 const middleware = createNodeMiddleware(webhooks);
 
 const server = createServer(async (req, res) =>  {
+  console.log(req);
   const resolved = await middleware(req, res);
+  console.log(resolved);
   if (resolved) return;
 
   // Healthcheck URL
