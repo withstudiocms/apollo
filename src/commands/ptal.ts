@@ -83,7 +83,11 @@ const computePullRequestStatus = (
     return "draft";
   }
 
-  if (!pr.mergeable || reviews.length === 0 || !reviews.find((x) => x.state === "APPROVED")) {
+  if (
+    !pr.mergeable || 
+    reviews.length === 0 ||
+    pr.locked
+  ) {
     return "waiting";
   }
 
@@ -265,7 +269,6 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
 
     return;
   }
-
 
   const { embed, message } = await makePtalEmbed(pr, reviewList, description, pullRequestUrl, interaction.user, interaction.guild!.id);
 

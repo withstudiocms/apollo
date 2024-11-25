@@ -34,44 +34,46 @@ async function handlePullRequestChange(pr: PullRequestCallback) {
 
   const data = await db.select().from(ptalTable).where(
     and(
-      eq(ptalTable.owner, pr.repository.owner.login), 
+      eq(ptalTable.owner, pr.repository.owner.login),
       eq(ptalTable.repository, pr.repository.name),
       eq(ptalTable.pr, pr.pull_request.number)
     )
   );
   
-  if (!data[0]) {
+  if (data.length === 0) {
     return;
   }
 
-  try {
-    const reviewList = await octokit.rest.pulls.listReviews({
-      owner: data[0].owner,
-      repo: data[0].repository,
-      pull_number: data[0].pr,
-    });
-
-    const channel = await client.channels.fetch(data[0].channel, { cache: true });
-
-    if (!channel || channel.type !== ChannelType.GuildText) return;
-
-    const originalMessage = await channel.messages.fetch(data[0].message);
-
-    const { embed, message } = await makePtalEmbed(
-      pr.pull_request as PullRequest,
-      reviewList.data,
-      data[0].description,
-      new URL(`https://github.com/${data[0].owner}/${data[0].repository}/pull/${data[0].pr}`),
-      originalMessage.author,
-      originalMessage.guild.id
-    );
-
-    await originalMessage.edit({
-      content: message,
-      embeds: [embed],
-    });
-  } catch (err) {
-    console.error(err);
+  for (const entry of data) {
+    try {
+      const reviewList = await octokit.rest.pulls.listReviews({
+        owner: entry.owner,
+        repo: entry.repository,
+        pull_number: entry.pr,
+      });
+  
+      const channel = await client.channels.fetch(entry.channel, { cache: true });
+  
+      if (!channel || channel.type !== ChannelType.GuildText) return;
+  
+      const originalMessage = await channel.messages.fetch(entry.message);
+  
+      const { embed, message } = await makePtalEmbed(
+        pr.pull_request as PullRequest,
+        reviewList.data,
+        entry.description,
+        new URL(`https://github.com/${entry.owner}/${entry.repository}/pull/${entry.pr}`),
+        originalMessage.author,
+        originalMessage.guild.id
+      );
+  
+      await originalMessage.edit({
+        content: message,
+        embeds: [embed],
+      });
+    } catch (err) {
+      console.error(err);
+    }
   }
 }
 
