@@ -8,22 +8,25 @@ import { createServer } from "node:http";
 import { client } from "../index";
 import { ChannelType } from "discord.js";
 import consola from "consola";
+import { EventPayloadMap } from "node_modules/@octokit/webhooks/dist-types/generated/webhook-identifiers";
 
-type PullRequestCallback = Parameters<Parameters<typeof webhooks.on<'pull_request'>>[1]>[0];
+type PullRequestCallback = EventPayloadMap['pull_request'];
 
 const webhooks = new Webhooks({
   secret: process.env.GITHUB_WEBHOOK_SECRET,
 });
 
-webhooks.on('pull_request', handlePullRequestChange);
-
 webhooks.onAny((event) => {
-  console.log(event, "event received");
+  if (
+    event.name === 'pull_request' ||
+    event.name === 'pull_request_review' ||
+    event.name === 'pull_request_review_comment'
+  ) {
+    handlePullRequestChange(event.payload as PullRequestCallback);
+  }
 });
 
 async function handlePullRequestChange(pr: PullRequestCallback) {
-  consola.log("test", pr)
-  console.log(pr);
   if (!client.isReady()) return;
 
   const octokit = await useGitHub();
@@ -31,9 +34,9 @@ async function handlePullRequestChange(pr: PullRequestCallback) {
 
   const data = await db.select().from(ptalTable).where(
     and(
-      eq(ptalTable.owner, pr.payload.repository.owner.login),
-      eq(ptalTable.repository, pr.payload.repository.name),
-      eq(ptalTable.pr, pr.payload.pull_request.number)
+      eq(ptalTable.owner, pr.repository.owner.login), 
+      eq(ptalTable.repository, pr.repository.name),
+      eq(ptalTable.pr, pr.pull_request.number)
     )
   );
   
@@ -55,7 +58,7 @@ async function handlePullRequestChange(pr: PullRequestCallback) {
     const originalMessage = await channel.messages.fetch(data[0].message);
 
     const { embed, message } = await makePtalEmbed(
-      pr.payload.pull_request as PullRequest,
+      pr.pull_request as PullRequest,
       reviewList.data,
       data[0].description,
       new URL(`https://github.com/${data[0].owner}/${data[0].repository}/pull/${data[0].pr}`),
@@ -76,7 +79,6 @@ const middleware = createNodeMiddleware(webhooks);
 
 const server = createServer(async (req, res) =>  {
   const resolved = await middleware(req, res);
-  console.log(resolved);
   if (resolved) return;
 
   // Healthcheck URL
