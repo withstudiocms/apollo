@@ -87,7 +87,7 @@ const computePullRequestStatus = (
   if (
     !pr.mergeable || 
     reviews.length === 0 ||
-    pr.locked
+    pr.mergeable_state === 'blocked'
   ) {
     return "waiting";
   }
