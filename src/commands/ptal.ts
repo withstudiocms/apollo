@@ -125,13 +125,25 @@ export const makePtalEmbed = async (
   const [owner, repo] = splitPath[0].slice(1).split("/");
   const prNumber = Number.parseInt(splitPath[1]);
 
-  console.log(reviewList);
+  const seen = new Map<string, string>();
+  const uniqueReviwes = reviewList.filter(item => {
+    if (!item.user) return false;
 
-  const {
-    reviews,
-    status,
-    title
-  } = parsePullRequest(pr, reviewList.filter((review) => review.user?.name?.includes("[bot]")));
+    const seenReview = seen.get(item.user.login);
+
+    if (seenReview && seenReview === item.state) return false;
+
+    seen.set(item.user.login, item.state);
+
+    return true;
+  });
+
+  const { reviews, status, title } = parsePullRequest(
+    pr, 
+    uniqueReviwes.filter((review) => (
+      !review.user?.name?.includes("[bot]")
+    )),
+  );
 
   const role_ping = role ? `<@&${role}>\n` : '';
   const repoPlusPullRequestId = `${owner}/${repo}#${prNumber}`;
