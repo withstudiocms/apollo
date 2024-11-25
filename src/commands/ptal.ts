@@ -79,6 +79,7 @@ const computePullRequestStatus = (
   pr: PullRequest,
   reviews: PullRequestReplies,
 ): PullRequestState => {
+  console.log(pr);
   if (pr.draft) {
     return "draft";
   }
