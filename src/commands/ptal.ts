@@ -262,11 +262,17 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
 
   if (!reply.interaction.channel) return;
 
+  const fetchedMessage = await reply.interaction.channel.messages.fetch(reply.id);
+
+  if (!fetchedMessage) {
+    throw new Error('Message not found.');
+  }
+
   const db = useDB();
   await db.insert(ptalTable).values({
     channel: reply.interaction.channel.id,
     description: description,
-    message: reply.id,
+    message: fetchedMessage.id,
     owner,
     repository: repo,
     pr: prNumber,
