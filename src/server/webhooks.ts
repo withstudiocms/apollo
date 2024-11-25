@@ -7,6 +7,7 @@ import { and, eq } from "drizzle-orm";
 import { createServer } from "node:http";
 import { client } from "../index";
 import { ChannelType } from "discord.js";
+import consola from "consola";
 
 type PullRequestCallback = Parameters<Parameters<typeof webhooks.on<'pull_request'>>[1]>[0];
 
@@ -17,6 +18,7 @@ const webhooks = new Webhooks({
 webhooks.on('pull_request', handlePullRequestChange);
 
 async function handlePullRequestChange(pr: PullRequestCallback) {
+  consola.log("test", pr)
   console.log(pr);
   if (!client.isReady()) return;
 
