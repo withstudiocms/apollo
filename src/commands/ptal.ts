@@ -131,7 +131,7 @@ export const makePtalEmbed = async (
     title
   } = parsePullRequest(pr, reviewList.filter((review) => review.user?.name?.includes("[bot]")));
 
-  const role_ping = role ? `<@&${role}>\n\n` : '';
+  const role_ping = role ? `<@&${role}>\n` : '';
   const repoPlusPullRequestId = `${owner}/${repo}#${prNumber}`;
 
   let message = `${role_ping}# PTAL / Ready for Review\n\n${description}`;
@@ -258,7 +258,6 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
   const reply = await interaction.reply({
     content: message,
     embeds: [embed],
-    allowedMentions: { parse: [] },
   });
 
   if (!reply.interaction.channel) return;

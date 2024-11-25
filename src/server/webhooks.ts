@@ -17,6 +17,7 @@ const webhooks = new Webhooks({
 webhooks.on('pull_request', handlePullRequestChange);
 
 async function handlePullRequestChange(pr: PullRequestCallback) {
+  console.log(pr);
   if (!client.isReady()) return;
 
   const octokit = await useGitHub();
@@ -68,8 +69,9 @@ async function handlePullRequestChange(pr: PullRequestCallback) {
 const middleware = createNodeMiddleware(webhooks);
 
 const server = createServer(async (req, res) =>  {
-  console.log("Request received:", req);
-  if (await middleware(req, res)) return;
+  const resolved = await middleware(req, res);
+  console.log(resolved);
+  if (resolved) return;
 
   if (req.url === '/') {
     res.writeHead(200);
