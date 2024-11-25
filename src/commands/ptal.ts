@@ -125,6 +125,8 @@ export const makePtalEmbed = async (
   const [owner, repo] = splitPath[0].slice(1).split("/");
   const prNumber = Number.parseInt(splitPath[1]);
 
+  console.log(reviewList);
+
   const {
     reviews,
     status,
