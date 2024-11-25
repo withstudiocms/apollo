@@ -17,6 +17,10 @@ const webhooks = new Webhooks({
 
 webhooks.on('pull_request', handlePullRequestChange);
 
+webhooks.onAny((event) => {
+  console.log(event, "event received");
+});
+
 async function handlePullRequestChange(pr: PullRequestCallback) {
   consola.log("test", pr)
   console.log(pr);
@@ -75,7 +79,8 @@ const server = createServer(async (req, res) =>  {
   console.log(resolved);
   if (resolved) return;
 
-  if (req.url === '/') {
+  // Healthcheck URL
+  if (req.url === '/api/healthcheck') {
     res.writeHead(200);
     res.end();
     
