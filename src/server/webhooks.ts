@@ -22,6 +22,7 @@ webhooks.onAny((event) => {
     event.name === 'pull_request_review' ||
     event.name === 'pull_request_review_comment'
   ) {
+    console.log(event.payload.pull_request, "Event received")
     handlePullRequestChange(event.payload as PullRequestCallback);
   }
 });

@@ -10,7 +10,8 @@ const requiredEnvs = [
   "GITHUB_APP_ID",
   "GITHUB_CLIENT_ID",
   "GITHUB_PRIVATE_KEY",
-  "GITHUB_INSTALLATION_ID"
+  "GITHUB_INSTALLATION_ID",
+  "GITHUB_WEBHOOK_SECRET"
 ];
 
 const checkRequiredENVs = (): EnvStatus => {
