@@ -47,11 +47,18 @@ async function handlePullRequestChange(pr: PullRequestCallback) {
 
   for (const entry of data) {
     try {
-      const reviewList = await octokit.rest.pulls.listReviews({
-        owner: entry.owner,
-        repo: entry.repository,
-        pull_number: entry.pr,
-      });
+      const [pullReq, reviewList] = await Promise.all([
+        octokit.rest.pulls.get({
+          owner: pr.repository.owner.login,
+          repo: pr.repository.name,
+          pull_number: entry.pr,
+        }),
+        await octokit.rest.pulls.listReviews({
+          owner: entry.owner,
+          repo: entry.repository,
+          pull_number: entry.pr,
+        })
+      ]);
   
       const channel = await client.channels.fetch(entry.channel, { cache: true });
   
@@ -60,7 +67,7 @@ async function handlePullRequestChange(pr: PullRequestCallback) {
       const originalMessage = await channel.messages.fetch(entry.message);
   
       const { embed, message } = await makePtalEmbed(
-        pr.pull_request as PullRequest,
+        pullReq.data,
         reviewList.data,
         entry.description,
         new URL(`https://github.com/${entry.owner}/${entry.repository}/pull/${entry.pr}`),
@@ -81,9 +88,7 @@ async function handlePullRequestChange(pr: PullRequestCallback) {
 const middleware = createNodeMiddleware(webhooks);
 
 const server = createServer(async (req, res) =>  {
-  console.log(req);
   const resolved = await middleware(req, res);
-  console.log(resolved);
   if (resolved) return;
 
   // Healthcheck URL
