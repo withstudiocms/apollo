@@ -130,7 +130,7 @@ export const makePtalEmbed = async (
   const prNumber = Number.parseInt(splitPath[1]);
 
   const seen = new Map<string, string>();
-  const uniqueReviwes = reviewList.filter(item => {
+  const uniqueReviwes = reviewList.filter((item) => {
     if (!item.user) return false;
 
     const seenReview = seen.get(item.user.login);
@@ -140,7 +140,7 @@ export const makePtalEmbed = async (
     seen.set(item.user.login, item.state);
 
     return true;
-  });
+  }).filter((review) => review.state !== 'DISMISSED');
 
   const { reviews, status, title } = parsePullRequest(
     pr, 
