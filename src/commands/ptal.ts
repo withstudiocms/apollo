@@ -83,6 +83,10 @@ const computePullRequestStatus = (
     return "draft";
   }
 
+  if (pr.merged) {
+    return "merged";
+  }
+
   if (
     !pr.mergeable || 
     reviews.length === 0 ||
@@ -97,10 +101,6 @@ const computePullRequestStatus = (
 
   if (pr.mergeable && !reviews.find((review) => review.state === "CHANGES_REQUESTED")) {
     return "approved";
-  }
-
-  if (pr.merged) {
-    return "merged";
   }
 
   return "waiting";
