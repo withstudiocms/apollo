@@ -137,6 +137,7 @@ export const makePtalEmbed = async (
 
     if (seenReview && seenReview === item.state) return false;
 
+    seen.delete(item.user.login);
     seen.set(item.user.login, item.state);
 
     return true;
