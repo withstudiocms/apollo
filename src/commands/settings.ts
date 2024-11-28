@@ -181,8 +181,12 @@ command
       option.setRequired(false);
       option.addChoices([
         { name: "0 Messages (Immediately)", value: "0" },
+        { name: "5 Messages", value: "5" },
         { name: "10 Messages", value: "10" },
+        { name: "25 Messages", value: "25" },
         { name: "50 Messages", value: "50" },
+        { name: "75 Messages", value: "75" },
+        { name: "100 Messages", value: "100" },
       ]);
   
       return option;

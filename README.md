@@ -108,6 +108,7 @@ docker run --detach "apollo"
 | `/settings`               | Command which carries the sub-commands for configuring the bot.                                         | Administrator       |
 | `/settings set-forum`     | Allows you to configure the Forum to be used for support requests.                                      | Administrator       |
 | `/settings set-ptal-role` | Sets the role that gets pinged when a new PTAL announcement is sent.                                    | Administrator       |
+| `/settings set-join-role` | Sets the role that a user receives when they join the server.                                           | Administrator       |
 | `/settings print`         | Prints an overview of all settings.                                                                     | Administrator       |
 | `/solved`                 | Sends an embed with buttons so the OP of a support request can close it. | Moderate Members    |
 | `/support`                | Creates a new post in the support forum based on the message you supply.                                | Moderate Members    |
