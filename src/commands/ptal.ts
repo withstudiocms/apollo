@@ -1,41 +1,29 @@
-import { BRAND_COLOR } from "@/consts";
-import { guildsTable, ptalTable } from "@/db/schema";
-import { useDB } from "@/utils/useDB";
-import { useGitHub } from "@/utils/useGitHub";
+import { ptalTable } from "@/db/schema";
+import { useDB } from "@/utils/global/useDB";
+import { useGitHub } from "@/utils/global/useGitHub";
+import { makePtalEmbed } from "@/utils/ptal/makePtalEmbed";
 import consola from "consola";
-import { ChatInputCommandInteraction, EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
-import { eq } from "drizzle-orm";
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { Octokit } from "octokit";
 
-type PullRequestState = 'draft' | 'waiting' | 'approved' | 'changes' | 'merged';
+export type PullRequestState = 'draft' | 'waiting' | 'approved' | 'changes' | 'merged';
 
 export type PullRequest = Awaited<ReturnType<Octokit['rest']['pulls']['get']>>['data'];
-type PullRequestReplies = Awaited<ReturnType<Octokit['rest']['pulls']['listReviews']>>['data'];
+export type PullRequestReplies = Awaited<ReturnType<Octokit['rest']['pulls']['listReviews']>>['data'];
 
-/**
- * Map for converting a PR state to the matching Discord label
- */
-const prStatusMap = new Map<PullRequestState, string>([
-  ['draft', `:white_circle: Draft`],
-  ['approved', `:white_check_mark: Approved`],
-  ['changes', `:no_entry_sign: Changes requested`],
-  ['merged', `:purple_circle: Merged`],
-  ['waiting', `:hourglass: Awaiting reviews`],
-]);
-
-enum ReviewStatus {
+export enum ReviewStatus {
   COMMENTED = 0,
   APPROVED = 1,
   CHANGES_REQUESTED = 2,
   UNKNOWN = 3
 };
 
-type Review = {
+export type Review = {
   author: string;
   status: ReviewStatus;
 };
 
-type ParsedPR = {
+export type ParsedPR = {
   status: {
     type: PullRequestState;
     label: string;
@@ -43,162 +31,6 @@ type ParsedPR = {
   title: string;
   reviews: Review[];
 };
-
-/**
- * Returns the relevant emoji for a given status enum
- * @param status The enum
- * @returns The emoji
- */
-const getReviewEmoji = (status: ReviewStatus) => {
-  if (status === ReviewStatus.APPROVED) return ":white_check_mark:";
-  if (status === ReviewStatus.CHANGES_REQUESTED) return ":no_entry_sign:";
-  if (status === ReviewStatus.COMMENTED) return ":speech_balloon:";
-
-  return ":question:";
-}
-
-/**
- * Converts a GitHub review status to a type-safe enum
- * @param status The review status from GitHub
- * @returns A review staus enum value
- */
-const convertStateToStatus = (status: string): ReviewStatus => {
-  if (status === "COMMENTED") return ReviewStatus.COMMENTED;
-  if (status === "APPROVED") return ReviewStatus.APPROVED;
-  if (status === "CHANGES_REQUESTED") return ReviewStatus.CHANGES_REQUESTED;
-  return ReviewStatus.UNKNOWN;
-}
-
-/**
- * Handles the logic for parsing the review and PR data to reliably get a status.
- * @param pr The PR data
- * @param reviews The review data
- * @returns A pull request state
- */
-const computePullRequestStatus = (
-  pr: PullRequest,
-  reviews: PullRequestReplies,
-): PullRequestState => {
-  if (pr.draft) {
-    return "draft";
-  }
-
-  if (pr.merged) {
-    return "merged";
-  }
-
-  if (
-    !pr.mergeable || 
-    reviews.length === 0 ||
-    pr.mergeable_state === 'blocked'
-  ) {
-    return "waiting";
-  }
-
-  if (reviews.find((review) => review.state === "CHANGES_REQUESTED")) {
-    return "changes";
-  }
-
-  if (pr.mergeable && !reviews.find((review) => review.state === "CHANGES_REQUESTED")) {
-    return "approved";
-  }
-
-  return "waiting";
-}
-
-/**
- * Creates an embed and message to be used in the PTAL notifications.
- * @param pr The PR to base the embed on
- * @param reviewList The reviews for the PR
- * @param interaction The discord.js interaction to reply to
- * @returns The embed and message for the PTAL notification
- */
-export const makePtalEmbed = async (
-  pr: PullRequest,
-  reviewList: PullRequestReplies,
-  description: string,
-  pullRequestUrl: URL,
-  user: ChatInputCommandInteraction['user'],
-  guildId: string
-) => {
-  const db = useDB();
-  const data = await db.select().from(guildsTable).where(eq(guildsTable.id, guildId));
-  const role = data[0].ptal_announcement_role;
-
-  const splitPath = pullRequestUrl.pathname.split("/pull/");
-  const [owner, repo] = splitPath[0].slice(1).split("/");
-  const prNumber = Number.parseInt(splitPath[1]);
-
-  const seen = new Map<string, string>();
-  const uniqueReviwes = reviewList.filter((item) => {
-    if (!item.user) return false;
-
-    const seenReview = seen.get(item.user.login);
-
-    if (seenReview && seenReview === item.state) return false;
-
-    seen.delete(item.user.login);
-    seen.set(item.user.login, item.state);
-
-    return true;
-  }).filter((review) => review.state !== 'DISMISSED');
-
-  const { reviews, status, title } = parsePullRequest(
-    pr, 
-    uniqueReviwes.filter((review) => (
-      !review.user?.name?.includes("[bot]")
-    )),
-  );
-
-  const role_ping = role ? `<@&${role}>\n` : '';
-  const repoPlusPullRequestId = `${owner}/${repo}#${prNumber}`;
-
-  let message = `${role_ping}# PTAL / Ready for Review\n\n${description}`;
-
-  const embed = new EmbedBuilder({
-    author: {
-      icon_url: user.avatarURL({ size: 64 }) || user.defaultAvatarURL,
-      name: user.username,
-    },
-    color: BRAND_COLOR,
-    fields: [
-      { name: "Repository", value: `[${repoPlusPullRequestId}](${pullRequestUrl.toString()})` },
-      { name: "Status", value: status.label },
-      { name: "Reviews", value: reviews.map((review) => (
-        `${getReviewEmoji(review.status)} [@${review.author}](https://github.com/${review.author})`
-      )).join("\n") || "*No reviews yet*" }
-    ],
-    timestamp: Date.now(),
-    title,
-  });
-
-  return { embed, message };
-}
-
-/**
- * Takes in a PR and parses it for easy use in the Discord API.
- * @param pr The pr response data
- * @param reviews The reviews response data
- * @returns Parsed data
- */
-const parsePullRequest = (
-  pr: PullRequest,
-  reviews: PullRequestReplies,
-): ParsedPR => {
-  let status = computePullRequestStatus(pr, reviews);
-
-  return {
-    status: {
-      type: status,
-      label: prStatusMap.get(status)!,
-    },
-    title: pr.title,
-    reviews: reviews.map((review) => ({
-      status: convertStateToStatus(review.state),
-      author: review.user?.login || ''
-    })),
-  }
-}
 
 /**
  * `/ptal` command handler.
@@ -271,12 +103,15 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
     return;
   }
 
-  const { embed, message } = await makePtalEmbed(pr, reviewList, description, pullRequestUrl, interaction.user, interaction.guild!.id);
+  const { embed, message, roleId } = await makePtalEmbed(pr, reviewList, description, pullRequestUrl, interaction.user, interaction.guild!.id);
 
   const reply = await interaction.reply({
     content: message,
     embeds: [embed],
     fetchReply: true,
+    allowedMentions: {
+      roles: [roleId]
+    }
   });
 
   if (!reply) return;

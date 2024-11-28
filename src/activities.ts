@@ -3,7 +3,7 @@ import { ActivitiesOptions, Client, ActivityType as DiscordActivityType } from "
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from 'url';
-import { shuffle } from "./utils/shuffle";
+import { shuffle } from "./utils/global/shuffle";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

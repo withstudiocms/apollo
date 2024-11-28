@@ -12,14 +12,16 @@
   "license": "MIT",
   "dependencies": {
     "@libsql/client": "^0.14.0",
+    "@octokit/webhooks": "^13.4.1",
     "bufferutil": "^4.0.8",
     "consola": "^3.2.3",
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.36.4",
     "octokit": "^4.0.2",
-    "zlib-sync": "^0.1.9",
-    "@octokit/webhooks": "^13.4.1"
+    "parse-duration": "^1.1.0",
+    "pretty-ms": "^9.2.0",
+    "zlib-sync": "^0.1.9"
   },
   "devDependencies": {
     "drizzle-kit": "^0.28.1",

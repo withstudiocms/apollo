@@ -1,5 +1,5 @@
 import { BRAND_COLOR } from "@/consts";
-import { createId } from "@/utils/createId";
+import { createId } from "@/utils/global/createId";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ChatInputCommandInteraction, ComponentType, EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 
 /**

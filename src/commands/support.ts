@@ -1,5 +1,5 @@
 import { guildsTable } from "@/db/schema";
-import { useDB } from "@/utils/useDB";
+import { useDB } from "@/utils/global/useDB";
 import { ChannelType, ChatInputCommandInteraction, GuildChannel, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { eq } from "drizzle-orm";
 
