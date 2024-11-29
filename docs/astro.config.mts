@@ -67,67 +67,12 @@ export default defineConfig({
 					label: 'Learn',
 					items: [
 						{
-							label: 'Start Here',
-							autogenerate: { directory: 'start-here' },
+							label: 'Getting Started',
+							autogenerate: { directory: 'getting-started' },
 						},
 						{
-							label: 'Understanding StudioCMS',
-							autogenerate: { directory: 'how-it-works' },
-						},
-						{
-							label: 'Package Catalog',
-							items: [
-								{
-									label: 'Package List',
-									link: '/package-catalog',
-									badge: { text: 'New', variant: 'success' },
-								},
-								{
-									label: 'StudioCMS Integrations',
-									autogenerate: { directory: 'package-catalog/studiocms-integrations' },
-									collapsed: true,
-								},
-								{
-									label: 'Community Integrations',
-									autogenerate: { directory: 'package-catalog/community-integrations' },
-									collapsed: true,
-								},
-							],
-						},
-						{
-							label: 'Customizing StudioCMS',
-							items: [
-								{
-									label: '@studiocms/renderers',
-									autogenerate: { directory: 'customizing/studiocms-renderers' },
-									collapsed: true,
-								},
-								{
-									label: '@studiocms/ui',
-									badge: { text: 'New', variant: 'success' },
-									items: [
-										{ label: 'Getting Started', link: 'customizing/studiocms-ui/' },
-										{
-											label: 'Components',
-											autogenerate: {
-												directory: 'customizing/studiocms-ui/components',
-												collapsed: true,
-											},
-										},
-									],
-									collapsed: true,
-								},
-							],
-						},
-					],
-				},
-				{
-					label: 'References',
-					items: [
-						{
-							label: 'Configuration Reference',
-							autogenerate: { directory: 'config-reference' },
-							collapsed: false,
+							label: 'Commands & Features',
+							autogenerate: { directory: 'commands-and-features' },
 						},
 					],
 				},
