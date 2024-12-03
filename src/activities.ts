@@ -15,6 +15,7 @@ interface ApolloActivity {
   type: ActivityType;
   name: string;
   details?: string;
+  duration?: number;
 };
 
 /**
@@ -86,9 +87,8 @@ const parseActivity = (activity: ApolloActivity): ActivitiesOptions => {
 /**
  * Starts the activity cycle.
  * @param client The discord.js client
- * @param duration The duration to keep the activity for in ms. Default is 45 seconds.
  */
-const startActivityCycle = async (client: Client, duration = 45_000) => {
+const startActivityCycle = async (client: Client) => {
   if (!client.user) {
     consola.error("Unable to start activities cylce due to missing user.");
     return;
@@ -102,10 +102,15 @@ const startActivityCycle = async (client: Client, duration = 45_000) => {
 
     consola.info(`Activity set to "${discordActivityTypeStrings.get(activityInfo.type)!}${activityInfo.name}"`);
 
-    await new Promise((resolve) => setTimeout(resolve, duration));
+    await new Promise((resolve) => setTimeout(
+      resolve, 
+      activity.duration 
+        ? activity.duration * 1000 
+        : 45_000,
+    ));
   }
 
-  startActivityCycle(client, duration);
+  startActivityCycle(client);
 }
 
 export { collectActivities, parseActivity, startActivityCycle };
