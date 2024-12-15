@@ -1,5 +1,5 @@
 {  
-  "description": "Activities Schema for Apollo",
+  "description": "Activities schema for Apollo",
   "type": "object",
   "properties": {
     "type": {

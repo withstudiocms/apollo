@@ -1,0 +1,11 @@
+{  
+  "description": "Ping-reply schema for Apollo",
+  "type": "object",
+  "properties": {
+    "message": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": ["message"]
+}

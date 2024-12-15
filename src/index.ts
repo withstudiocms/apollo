@@ -9,6 +9,7 @@ import { checkRequiredENVs } from './utils/global/checkRequiredENVs';
 import { server } from './server/webhooks';
 import { checkPtalMessages } from './utils/ptal/checkPtalMessages';
 import { and, eq } from 'drizzle-orm';
+import { collectReplies } from './ping-replies';
 
 const { valid, message } = checkRequiredENVs();
 
@@ -116,8 +117,6 @@ client.on('messageCreate', async (interaction) => {
     Date.now() - settings.join_role_min_duration > interaction.member.joinedAt.getDate()
   );
 
-  console.log(meetsMinimumDurationAmountRequirement, meetsMinimumMessageAmountRequirement);
-
   // If no minimum amount of messages is set, and the user meets the minimum duration requirement
   if (!settings.join_role_min_messages && meetsMinimumDurationAmountRequirement) {
     shouldReceiveRole = true;
@@ -157,6 +156,16 @@ client.on('messageCreate', async (interaction) => {
         eq(messagesByAuthorTable.guild, interaction.guild.id)
       )
     );
+  }
+});
+
+client.on('messageCreate', async (message) => {
+  if (message.author.bot) return;
+
+  const messages = collectReplies();
+
+  if (message.mentions.has(client.user!)) {
+    message.reply(messages[Math.floor(Math.random() * messages.length)].message);
   }
 });
 

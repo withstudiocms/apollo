@@ -1,13 +1,10 @@
 import { ptalTable } from "@/db/schema";
 import { useDB } from "@/utils/global/useDB";
-import { useGitHub } from "@/utils/global/useGitHub";
 import { Webhooks, createNodeMiddleware } from "@octokit/webhooks";
 import { and, eq } from "drizzle-orm";
-import { createServer } from "node:http";
+import { createServer, IncomingMessage, ServerResponse } from "node:http";
 import { client } from "../index";
-import { ChannelType } from "discord.js";
 import { EventPayloadMap } from "node_modules/@octokit/webhooks/dist-types/generated/webhook-identifiers";
-import { makePtalEmbed } from "@/utils/ptal/makePtalEmbed";
 import { editPtalMessage } from "@/utils/ptal/editPtalMessage";
 
 type PullRequestCallback = EventPayloadMap['pull_request'];
@@ -22,7 +19,6 @@ webhooks.onAny((event) => {
     event.name === 'pull_request_review' ||
     event.name === 'pull_request_review_comment'
   ) {
-    console.log(event.payload.pull_request, "Event received")
     handlePullRequestChange(event.payload as PullRequestCallback);
   }
 });
@@ -55,7 +51,7 @@ async function handlePullRequestChange(pr: PullRequestCallback) {
 
 const middleware = createNodeMiddleware(webhooks);
 
-const server = createServer(async (req, res) =>  {
+const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>  {
   const resolved = await middleware(req, res);
   if (resolved) return;
 
