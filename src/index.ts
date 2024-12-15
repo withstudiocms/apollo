@@ -163,7 +163,7 @@ client.on('messageCreate', async (interaction) => {
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
 
-  if (message.mentions.has(client.user!)) {
+  if (message.mentions.members?.has(client.user!.id)) {
     message.reply(messages[Math.floor(Math.random() * messages.length)].message);
   }
 });
