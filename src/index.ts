@@ -22,6 +22,7 @@ const client = new Client({
 });
 
 const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_APP_TOKEN);
+const messages = collectReplies();
 
 try {
   consola.info('Started refreshing application (/) commands.');
@@ -161,8 +162,6 @@ client.on('messageCreate', async (interaction) => {
 
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
-
-  const messages = collectReplies();
 
   if (message.mentions.has(client.user!)) {
     message.reply(messages[Math.floor(Math.random() * messages.length)].message);
