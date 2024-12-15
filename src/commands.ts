@@ -7,7 +7,7 @@ import ptal from "./commands/ptal";
 
 export type Command = {
   builder: SlashCommandBuilder;
-  execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
+  execute: (interaction: ChatInputCommandInteraction) => Promise<any>;
 };
 
 const commands = new Collection<string, Command>();

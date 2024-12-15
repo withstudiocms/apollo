@@ -54,11 +54,11 @@ const collectActivities = (): ApolloActivity[] => {
     consola.error("Activities directory not found at src/activities.");
   }
 
-  const activitiyFiles = fs.readdirSync(activitiesPath);
+  const activityFiles = fs.readdirSync(activitiesPath);
 
   const activities: ApolloActivity[] = [];
 
-  for (const activity of activitiyFiles) {
+  for (const activity of activityFiles) {
     if (!activity.endsWith(".json")) continue;
 
     const file = fs.readFileSync(path.resolve(activitiesPath, activity), { encoding: "utf-8" });

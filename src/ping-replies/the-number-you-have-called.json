@@ -1,0 +1,4 @@
+{
+  "$schema": "../ping-replies.schema.json",
+  "message": "The number you have called is not in service. Please check the number and try again."
+}
