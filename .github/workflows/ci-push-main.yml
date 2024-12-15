@@ -1,0 +1,17 @@
+name: CI - Push to main
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+    mergebot:
+      if: ${{ github.repository_owner == 'withstudiocms' && github.event_name == 'push' && github.event.commits[0].message != '[ci] lint' }}
+      uses: withstudiocms/automations/.github/workflows/mergebot.yml@main
+      secrets:
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_MERGEBOT }}
