@@ -103,16 +103,9 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
     return;
   }
 
-  const { embed, message, roleId } = await makePtalEmbed(pr, reviewList, description, pullRequestUrl, interaction.user, interaction.guild!.id);
+  const { newInteraction } = await makePtalEmbed(pr, reviewList, description, pullRequestUrl, interaction.user, interaction.guild!.id);
 
-  const reply = await interaction.reply({
-    content: message,
-    embeds: [embed],
-    fetchReply: true,
-    allowedMentions: {
-      roles: [roleId]
-    }
-  });
+  const reply = await interaction.reply(newInteraction);
 
   if (!reply) return;
 
