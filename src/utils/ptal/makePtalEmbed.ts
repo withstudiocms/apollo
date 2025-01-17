@@ -5,6 +5,7 @@ import { guildsTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { parsePullRequest } from "./parsePullRequest";
 import { BRAND_COLOR } from "@/consts";
+import { client } from "@/index";
 
 /**
  * Returns the relevant emoji for a given status enum
@@ -98,21 +99,22 @@ const makePtalEmbed: MakePtalEmbed = async (
   });
   
   const viewOnGithub = new ButtonBuilder()
-    .setCustomId('ptal-github')
+    .setStyle(ButtonStyle.Link)
     .setLabel('See on GitHub')
-    .setURL(pullRequestUrl.href)
-    .setStyle(ButtonStyle.Primary)
-    .setEmoji('1329780197385441340');
+    .setURL(pullRequestUrl.href);
+  
+  if (client.emojis.resolve('1329780197385441340')) {
+    viewOnGithub.setEmoji('<:github:1329780197385441340>');
+  }
 
   const viewFiles = new ButtonBuilder()
-    .setCustomId('ptal-github-files')
+    .setStyle(ButtonStyle.Link)
     .setLabel('View Files')
-    .setURL(new URL('files', pullRequestUrl).href)
-    .setStyle(ButtonStyle.Primary)
-    .setEmoji(':open_file_folder:');
+    .setURL(new URL('files', pullRequestUrl).href);
   
-  const row = new ActionRowBuilder<ButtonBuilder>()
-    .addComponents(viewOnGithub, viewFiles);
+  const row = new ActionRowBuilder<ButtonBuilder>({
+    components: [viewOnGithub, viewFiles]
+  });
 
   return {
     newInteraction: {
