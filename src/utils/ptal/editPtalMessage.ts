@@ -28,22 +28,18 @@ const editPtalMessage = async (data: typeof ptalTable.$inferSelect, client: Clie
 
   const originalMessage = await channel.messages.fetch(data.message);
 
-  const { embed, message, roleId } = await makePtalEmbed(
+  const pullRequestUrl = new URL(`https://github.com/${data.owner}/${data.repository}/pull/${data.pr}`)
+
+  const { edit } = await makePtalEmbed(
     pullReq.data,
     reviewList.data,
     data.description,
-    new URL(`https://github.com/${data.owner}/${data.repository}/pull/${data.pr}`),
+    pullRequestUrl,
     originalMessage.author,
     originalMessage.guild.id
   );
-
-  await originalMessage.edit({
-    content: message,
-    embeds: [embed],
-    allowedMentions: {
-      roles: [roleId]
-    }
-  });
+    
+  await originalMessage.edit(edit);
 
   if (pullReq.data.merged) {
     await db.delete(ptalTable).where(eq(ptalTable.id, data.id));

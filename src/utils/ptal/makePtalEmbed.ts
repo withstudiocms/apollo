@@ -1,10 +1,11 @@
 import { PullRequest, PullRequestReplies, ReviewStatus } from "@/commands/ptal";
-import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder, InteractionReplyOptions, MessageEditOptions } from "discord.js";
 import { useDB } from "../global/useDB";
 import { guildsTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { parsePullRequest } from "./parsePullRequest";
 import { BRAND_COLOR } from "@/consts";
+import { client } from "@/index";
 
 /**
  * Returns the relevant emoji for a given status enum
@@ -19,6 +20,18 @@ const getReviewEmoji = (status: ReviewStatus) => {
   return ":question:";
 }
 
+type MakePtalEmbed = (pr: PullRequest,
+  reviewList: PullRequestReplies,
+  description: string,
+  pullRequestUrl: URL,
+  user: ChatInputCommandInteraction['user'],
+  guildId: string) => Promise<{
+    newInteraction: InteractionReplyOptions & {
+        fetchReply: true;
+    };
+    edit: MessageEditOptions;
+  }>;
+
 /**
  * Creates an embed and message to be used in the PTAL notifications.
  * @param pr The PR to base the embed on
@@ -26,13 +39,13 @@ const getReviewEmoji = (status: ReviewStatus) => {
  * @param interaction The discord.js interaction to reply to
  * @returns The embed and message for the PTAL notification
  */
-const makePtalEmbed = async (
-  pr: PullRequest,
-  reviewList: PullRequestReplies,
-  description: string,
-  pullRequestUrl: URL,
-  user: ChatInputCommandInteraction['user'],
-  guildId: string
+const makePtalEmbed: MakePtalEmbed = async (
+  pr,
+  reviewList,
+  description,
+  pullRequestUrl,
+  user,
+  guildId
 ) => {
   const db = useDB();
   const data = await db.select().from(guildsTable).where(eq(guildsTable.id, guildId));
@@ -84,8 +97,44 @@ const makePtalEmbed = async (
     timestamp: Date.now(),
     title,
   });
+  
+  const viewOnGithub = new ButtonBuilder()
+    .setStyle(ButtonStyle.Link)
+    .setLabel('See on GitHub')
+    .setURL(pullRequestUrl.href);
+  
+  if (client.emojis.resolve('1329780197385441340')) {
+    viewOnGithub.setEmoji('<:github:1329780197385441340>');
+  }
 
-  return { embed, message, roleId: role! };
+  const viewFiles = new ButtonBuilder()
+    .setStyle(ButtonStyle.Link)
+    .setLabel('View Files')
+    .setURL(new URL('files', pullRequestUrl).href);
+  
+  const row = new ActionRowBuilder<ButtonBuilder>({
+    components: [viewOnGithub, viewFiles]
+  });
+
+  return {
+    newInteraction: {
+      content: message,
+      embeds: [embed],
+      fetchReply: true,
+      components: [row],
+      allowedMentions: {
+        roles: [role!],
+      }
+    },
+    edit: {
+      content: message,
+      embeds: [embed],
+      components: [row],
+      allowedMentions: {
+        roles: [role!],
+      }
+    }
+  }
 }
 
 export { makePtalEmbed };
