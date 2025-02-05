@@ -20,7 +20,7 @@ const convertStateToStatus = (status: string): ReviewStatus => {
  */
 const computePullRequestStatus = (
   pr: PullRequest,
-  reviews: PullRequestReplies,
+  reviews: Map<string, string>,
 ): PullRequestState => {
   if (pr.draft) {
     return "draft";
@@ -32,17 +32,19 @@ const computePullRequestStatus = (
 
   if (
     !pr.mergeable || 
-    reviews.length === 0 ||
+    reviews.size === 0 ||
     pr.mergeable_state === 'blocked'
   ) {
     return "waiting";
   }
 
-  if (reviews.find((review) => review.state === "CHANGES_REQUESTED")) {
+  const reviewAuthors = Array.from(reviews.keys());
+
+  if (reviewAuthors.find((author) => reviews.get(author) === "CHANGES_REQUESTED")) {
     return "changes";
   }
 
-  if (pr.mergeable && !reviews.find((review) => review.state === "CHANGES_REQUESTED")) {
+  if (pr.mergeable && !reviewAuthors.find((author) => reviews.get(author) === "CHANGES_REQUESTED")) {
     return "approved";
   }
 
@@ -68,9 +70,11 @@ const prStatusMap = new Map<PullRequestState, string>([
  */
 const parsePullRequest = (
   pr: PullRequest,
-  reviews: PullRequestReplies,
+  reviews: Map<string, string>,
 ): ParsedPR => {
   let status = computePullRequestStatus(pr, reviews);
+
+  const reviewAuthors = Array.from(reviews.keys());
 
   return {
     status: {
@@ -78,9 +82,9 @@ const parsePullRequest = (
       label: prStatusMap.get(status)!,
     },
     title: pr.title,
-    reviews: reviews.map((review) => ({
-      status: convertStateToStatus(review.state),
-      author: review.user?.login || ''
+    reviews: reviewAuthors.map((author) => ({
+      author,
+      status: convertStateToStatus(reviews.get(author)!),
     })),
   }
 }
