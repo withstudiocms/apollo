@@ -18,7 +18,13 @@ if (!valid) {
 }
 
 const client = new Client({ 
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildModeration,
+    GatewayIntentBits.MessageContent,
+  ],
 });
 
 const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_APP_TOKEN);
