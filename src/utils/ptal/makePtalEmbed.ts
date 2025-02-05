@@ -56,7 +56,7 @@ const makePtalEmbed: MakePtalEmbed = async (
   const prNumber = Number.parseInt(splitPath[1]);
 
   const seen = new Map<string, string>();
-  const uniqueReviwes = reviewList.filter((item) => {
+  const uniqueReviews = reviewList.filter((item) => {
     if (!item.user) return false;
 
     const seenReview = seen.get(item.user.login);
@@ -69,26 +69,16 @@ const makePtalEmbed: MakePtalEmbed = async (
     return true;
   }).filter((review) => review.state !== 'DISMISSED');
 
-  const { reviews, status, title } = parsePullRequest(
-    pr, 
-    uniqueReviwes.filter((review) => (
-      !review.user?.name?.includes("[bot]")
-    )),
-  );
+  const { reviews, status, title } = parsePullRequest(pr, seen);
 
   const role_ping = role ? `<@&${role}>\n` : '';
-  const repoPlusPullRequestId = `${owner}/${repo}#${prNumber}`;
 
   let message = `${role_ping}# PTAL / Ready for Review\n\n${description}`;
 
   const embed = new EmbedBuilder({
-    author: {
-      icon_url: user.avatarURL({ size: 64 }) || user.defaultAvatarURL,
-      name: user.username,
-    },
     color: BRAND_COLOR,
     fields: [
-      { name: "Repository", value: `[${repoPlusPullRequestId}](${pullRequestUrl.toString()})` },
+      { name: "Repository", value: `[${owner}/${repo}](${pullRequestUrl.toString().split("/pull/")[0]})` },
       { name: "Status", value: status.label },
       { name: "Reviews", value: reviews.map((review) => (
         `${getReviewEmoji(review.status)} [@${review.author}](https://github.com/${review.author})`
@@ -110,7 +100,7 @@ const makePtalEmbed: MakePtalEmbed = async (
   const viewFiles = new ButtonBuilder()
     .setStyle(ButtonStyle.Link)
     .setLabel('View Files')
-    .setURL(new URL('files', pullRequestUrl).href);
+    .setURL(new URL(`${pullRequestUrl.href}/files`).href);
   
   const row = new ActionRowBuilder<ButtonBuilder>({
     components: [viewOnGithub, viewFiles]
