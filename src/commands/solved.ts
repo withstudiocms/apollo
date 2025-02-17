@@ -1,6 +1,6 @@
 import { BRAND_COLOR } from "@/consts";
 import { createId } from "@/utils/global/createId";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ChatInputCommandInteraction, ComponentType, EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ChatInputCommandInteraction, ComponentType, EmbedBuilder, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 
 /**
  * `/solved` command handler.
@@ -11,7 +11,7 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
 
   if (interaction.channel.type !== ChannelType.PublicThread) {
     await interaction.reply({
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
       content: "This command can only be used in a forum channel.",
     });
 

@@ -26,9 +26,7 @@ type MakePtalEmbed = (pr: PullRequest,
   pullRequestUrl: URL,
   user: ChatInputCommandInteraction['user'],
   guildId: string) => Promise<{
-    newInteraction: InteractionReplyOptions & {
-        fetchReply: true;
-    };
+    newInteraction: InteractionReplyOptions;
     edit: MessageEditOptions;
   }>;
 
@@ -110,7 +108,7 @@ const makePtalEmbed: MakePtalEmbed = async (
     newInteraction: {
       content: message,
       embeds: [embed],
-      fetchReply: true,
+      withResponse: true,
       components: [row],
       allowedMentions: {
         roles: [role!],

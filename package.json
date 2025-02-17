@@ -15,7 +15,7 @@
     "@octokit/webhooks": "^13.4.1",
     "bufferutil": "^4.0.8",
     "consola": "^3.2.3",
-    "discord.js": "^14.16.3",
+    "discord.js": "^14.18.0",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.36.4",
     "octokit": "^4.0.2",

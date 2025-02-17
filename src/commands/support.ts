@@ -1,6 +1,6 @@
 import { guildsTable } from "@/db/schema";
 import { useDB } from "@/utils/global/useDB";
-import { ChannelType, ChatInputCommandInteraction, GuildChannel, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { ChannelType, ChatInputCommandInteraction, GuildChannel, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { eq } from "drizzle-orm";
 
 /**
@@ -20,7 +20,7 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
 
   if (!data[0].forum_channel) {
     await interaction.reply({
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
       content: "No support forums channel has been registered yet!"
     });
 
@@ -31,7 +31,7 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
 
   if (!forumChannel || forumChannel.type !== ChannelType.GuildForum) {
     await interaction.reply({
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
       content: "Failed to move message."
     });
 
