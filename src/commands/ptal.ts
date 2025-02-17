@@ -3,7 +3,7 @@ import { useDB } from "@/utils/global/useDB";
 import { useGitHub } from "@/utils/global/useGitHub";
 import { makePtalEmbed } from "@/utils/ptal/makePtalEmbed";
 import consola from "consola";
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { ChatInputCommandInteraction, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { Octokit } from "octokit";
 
 export type PullRequestState = 'draft' | 'waiting' | 'approved' | 'changes' | 'merged';
@@ -39,8 +39,8 @@ export type ParsedPR = {
 const handler = async (interaction: ChatInputCommandInteraction) => {
   if (!interaction.member || !interaction.guild) {
     await interaction.reply({
-      ephemeral: true,
-      content: "Something went wrong."
+      flags: [MessageFlags.Ephemeral],
+      content: "Something went wrong.",
     });
 
     return;
@@ -53,7 +53,7 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
 
   if (pullRequestUrl.origin !== "https://github.com" || !pullRequestUrl.pathname.includes("/pull/")) {
     await interaction.reply({
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
       content: "GitHub Link must be a valid URL to a PR!"
     });
 
@@ -83,7 +83,7 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
 
     if (prRes.status !== 200 || reviewListRes.status !== 200) {
       await interaction.reply({
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
         content: "Something went wrong while fetching the PR.",
       });
   
@@ -96,7 +96,7 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
     consola.error(err);
 
     await interaction.reply({
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
       content: "Something went wrong while fetching the PR.",
     });
 

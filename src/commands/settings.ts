@@ -1,7 +1,7 @@
 import { BRAND_COLOR } from "@/consts";
 import { guildsLabelMap, GuildsMapKey, guildsTable } from "@/db/schema";
 import { useDB } from "@/utils/global/useDB";
-import { ChannelType, ChatInputCommandInteraction, EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { ChannelType, ChatInputCommandInteraction, EmbedBuilder, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { eq } from "drizzle-orm";
 import parse from 'parse-duration';
 import prettyMS from 'pretty-ms';
@@ -57,7 +57,7 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
     }).where(eq(guildsTable.id, interaction.guild.id));
 
     return await interaction.reply({
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
       content: "Channel configured successfully."
     });
   }
@@ -70,7 +70,7 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
     }).where(eq(guildsTable.id, interaction.guild.id));
 
     return await interaction.reply({
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
       content: "PTAL notification role configured successfully."
     });
   }
@@ -84,7 +84,7 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
     
     if (minDuration && !durationInMS) {
       return await interaction.reply({
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
         content: `Couldn't parse given duration.`
       });
     }
@@ -93,7 +93,7 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
 
     if (minMessages && Number.isNaN(parsedMessages)) {
       return await interaction.reply({
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
         content: `Given messages option is not a number.`
       });
     }
@@ -105,7 +105,7 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
     }).where(eq(guildsTable.id, interaction.guild.id));
 
     return await interaction.reply({
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
       content: "Join role configured successfully."
     });
   }
@@ -126,8 +126,8 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
     });
 
     return await interaction.reply({
+      flags: [MessageFlags.Ephemeral],
       embeds: [embed],
-      ephemeral: true,
     });
   }
 }
