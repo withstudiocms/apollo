@@ -3,7 +3,7 @@ import { useDB } from "@/utils/global/useDB";
 import { useGitHub } from "@/utils/global/useGitHub";
 import { makePtalEmbed } from "@/utils/ptal/makePtalEmbed";
 import consola from "consola";
-import { ChatInputCommandInteraction, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { ChatInputCommandInteraction, InteractionResponse, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { Octokit } from "octokit";
 
 export type PullRequestState = 'draft' | 'waiting' | 'approved' | 'changes' | 'merged';
@@ -105,15 +105,16 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
 
   const { newInteraction } = await makePtalEmbed(pr, reviewList, description, pullRequestUrl, interaction.user, interaction.guild!.id);
 
-  const reply = await interaction.reply(newInteraction);
+  // Workaround since the type doesn't seem to be exported in discord.js v14.18.0
+  const reply = await interaction.reply(newInteraction) as InteractionResponse & { resource: { message: { id: string, channelId: string } } };
 
   if (!reply) return;
 
   const db = useDB();
   await db.insert(ptalTable).values({
-    channel: reply.channel.id,
+    channel: reply.resource.message.channelId,
     description: description,
-    message: reply.id,
+    message: reply.resource.message.id,
     owner,
     repository: repo,
     pr: prNumber,
