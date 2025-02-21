@@ -73,8 +73,8 @@ client.on('guildCreate', async (guild) => {
 });
 
 client.on('guildMemberAdd', async (member) => {
-  console.log("Member joined", member);
   if (member.user.bot || !member.user || !member.guild) return;
+  console.log("Member joined", member.user.username);
 
   const db = useDB();
   const data = await db.select().from(guildsTable).where(eq(guildsTable.id, member.guild.id));
