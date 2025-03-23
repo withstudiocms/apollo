@@ -1,4 +1,5 @@
 import { ParsedPR, PullRequest, PullRequestReplies, PullRequestState, ReviewStatus } from "@/commands/ptal";
+import { BRAND_COLOR, DANGER_COLOR, DRAFT_COLOR, SUCCESS_COLOR } from "@/consts";
 
 /**
  * Converts a GitHub review status to a type-safe enum
@@ -62,6 +63,14 @@ const prStatusMap = new Map<PullRequestState, string>([
   ['waiting', `:hourglass: Awaiting reviews`],
 ]);
 
+const prStatusColors = new Map<PullRequestState, number>([
+  ['draft', DRAFT_COLOR],
+  ['approved', SUCCESS_COLOR],
+  ['changes', DANGER_COLOR],
+  ['merged', SUCCESS_COLOR],
+  ['waiting', BRAND_COLOR]
+])
+
 /**
  * Takes in a PR and parses it for easy use in the Discord API.
  * @param pr The pr response data
@@ -77,6 +86,7 @@ const parsePullRequest = (
   const reviewAuthors = Array.from(reviews.keys());
 
   return {
+    color: prStatusColors.get(status)!,
     status: {
       type: status,
       label: prStatusMap.get(status)!,

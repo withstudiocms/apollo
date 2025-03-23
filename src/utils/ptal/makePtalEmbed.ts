@@ -67,14 +67,14 @@ const makePtalEmbed: MakePtalEmbed = async (
     return true;
   }).filter((review) => review.state !== 'DISMISSED');
 
-  const { reviews, status, title } = parsePullRequest(pr, seen);
+  const { reviews, status, title, color } = parsePullRequest(pr, seen);
 
   const role_ping = role ? `<@&${role}>\n` : '';
 
   let message = `${role_ping}# PTAL / Ready for Review\n\n${description}`;
 
   const embed = new EmbedBuilder({
-    color: BRAND_COLOR,
+    color: color,
     fields: [
       { name: "Repository", value: `[${owner}/${repo}](${pullRequestUrl.toString().split("/pull/")[0]})` },
       { name: "Status", value: status.label },

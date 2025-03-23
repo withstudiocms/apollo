@@ -24,6 +24,7 @@ export type Review = {
 };
 
 export type ParsedPR = {
+  color: number;
   status: {
     type: PullRequestState;
     label: string;
