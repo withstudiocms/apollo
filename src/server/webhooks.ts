@@ -24,10 +24,14 @@ webhooks.onAny((event) => {
   }
 });
 
-async function getMemberCount(serverId: string) {
+async function getMemberCount(serverId: string): Promise<number | null> {
+  if (!client.isReady()) return null;
+
   const guild = await client.guilds.fetch(serverId);
 
-  return guild.memberCount;
+  if (!guild) return null;
+
+  return guild.memberCount ?? null;
 }
 
 async function handlePullRequestChange(pr: PullRequestCallback) {
@@ -79,13 +83,19 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
       return;
     }
 
-    const membercount = await getMemberCount(serverId);
+    const memberCount = await getMemberCount(serverId);
+
+    if (memberCount === null) {
+      res.writeHead(500);
+      res.end();
+      return;
+    }
 
     res.writeHead(200, {
       'Content-Type': 'application/json',
     });
 
-    res.end(JSON.stringify({ members: membercount }));
+    res.end(JSON.stringify({ members: memberCount }));
   }
 
   res.writeHead(404);
