@@ -27,11 +27,13 @@ webhooks.onAny((event) => {
 async function getMemberCount(serverId: string): Promise<number | null> {
   if (!client.isReady()) return null;
 
-  const guild = await client.guilds.fetch(serverId);
-
-  if (!guild) return null;
-
-  return guild.memberCount ?? null;
+  try {
+    const guild = await client.guilds.fetch(serverId);
+    return guild.memberCount ?? null;
+  } catch (error) {
+    console.error(`Failed to fetch guild ${serverId}:`, error);
+    return null;
+  }
 }
 
 async function handlePullRequestChange(pr: PullRequestCallback) {
