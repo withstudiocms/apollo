@@ -31,7 +31,7 @@ async function getMemberCount(serverId: string): Promise<number | null> {
     const guild = await client.guilds.fetch(serverId);
     return guild.memberCount ?? null;
   } catch (error) {
-    console.error(`Failed to fetch guild ${serverId}:`, error);
+    console.error("Failed to fetch guild %s:", serverId, error);
     return null;
   }
 }
@@ -76,8 +76,8 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
     return;
   }
 
-  if (req.url?.startsWith('/api/members/')) {
-    const serverId = req.url.match(SERVER_ID_REGEX)?.[1];
+  if (SERVER_ID_REGEX.test(req.url || '')) {
+    const serverId = req.url!.match(SERVER_ID_REGEX)?.[1];
 
     if (!serverId) {
       res.writeHead(400);
