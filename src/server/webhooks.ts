@@ -12,6 +12,7 @@ type PullRequestCallback = EventPayloadMap['pull_request'];
 const webhooks = new Webhooks({
   secret: process.env.GITHUB_WEBHOOK_SECRET,
 });
+const SERVER_ID_REGEX = /^\/api\/members\/(\d+)$/;
 
 webhooks.onAny((event) => {
   if (
@@ -22,6 +23,18 @@ webhooks.onAny((event) => {
     handlePullRequestChange(event.payload as PullRequestCallback);
   }
 });
+
+async function getMemberCount(serverId: string): Promise<number | null> {
+  if (!client.isReady()) return null;
+
+  try {
+    const guild = await client.guilds.fetch(serverId);
+    return guild.memberCount ?? null;
+  } catch (error) {
+    console.error("Failed to fetch guild %s:", serverId, error);
+    return null;
+  }
+}
 
 async function handlePullRequestChange(pr: PullRequestCallback) {
   if (!client.isReady()) return;
@@ -61,6 +74,30 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
     res.end();
     
     return;
+  }
+
+  if (SERVER_ID_REGEX.test(req.url || '')) {
+    const serverId = req.url!.match(SERVER_ID_REGEX)?.[1];
+
+    if (!serverId) {
+      res.writeHead(400);
+      res.end();
+      return;
+    }
+
+    const memberCount = await getMemberCount(serverId);
+
+    if (memberCount === null) {
+      res.writeHead(500);
+      res.end();
+      return;
+    }
+
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+    });
+
+    res.end(JSON.stringify({ members: memberCount }));
   }
 
   res.writeHead(404);
