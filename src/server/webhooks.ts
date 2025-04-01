@@ -12,6 +12,7 @@ type PullRequestCallback = EventPayloadMap['pull_request'];
 const webhooks = new Webhooks({
   secret: process.env.GITHUB_WEBHOOK_SECRET,
 });
+const SERVER_ID_REGEX = /^\/api\/members\/(\d+)$/;
 
 webhooks.onAny((event) => {
   if (
@@ -22,6 +23,12 @@ webhooks.onAny((event) => {
     handlePullRequestChange(event.payload as PullRequestCallback);
   }
 });
+
+async function getMemberCount(serverId: string) {
+  const guild = await client.guilds.fetch(serverId);
+
+  return guild.memberCount;
+}
 
 async function handlePullRequestChange(pr: PullRequestCallback) {
   if (!client.isReady()) return;
@@ -61,6 +68,24 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
     res.end();
     
     return;
+  }
+
+  if (req.url?.startsWith('/api/members/')) {
+    const serverId = req.url.match(SERVER_ID_REGEX)?.[1];
+
+    if (!serverId) {
+      res.writeHead(400);
+      res.end();
+      return;
+    }
+
+    const membercount = await getMemberCount(serverId);
+
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+    });
+
+    res.end(JSON.stringify({ members: membercount }));
   }
 
   res.writeHead(404);
