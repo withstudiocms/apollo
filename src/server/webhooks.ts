@@ -98,6 +98,7 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
     });
 
     res.end(JSON.stringify({ members: memberCount }));
+    return;
   }
 
   res.writeHead(404);
