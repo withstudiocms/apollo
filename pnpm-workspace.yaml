@@ -1,0 +1,11 @@
+minimumReleaseAge: 4320
+
+minimumReleaseAgeExclude:
+  - studiocms
+  - '@studiocms/*'
+  - '@withstudiocms/*'
+
+onlyBuiltDependencies:
+  - bufferutil
+  - esbuild
+  - zlib-sync
