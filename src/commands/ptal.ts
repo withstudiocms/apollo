@@ -57,6 +57,7 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
       flags: [MessageFlags.Ephemeral],
       content: "GitHub URL must include protocol."
     });
+    return;
   }
 
   const pullRequestUrl = new URL(requestURLInput);
