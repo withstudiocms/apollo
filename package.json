@@ -5,7 +5,7 @@
 	"type": "module",
 	"main": "index.js",
 	"scripts": {
-		"start": "pnpx --env-file=.env tsx ./src/index.ts"
+		"start": "pnpm exec tsx --env-file=.env ./src/index.ts"
 	},
 	"keywords": [],
 	"author": "",
