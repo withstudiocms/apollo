@@ -33,5 +33,6 @@ RUN rm -rf ./node_modules
 RUN apk add --no-cache py-setuptools python3 make g++
 RUN npm install --global corepack@latest
 RUN corepack enable pnpm
+RUN pnpm install --frozen-lockfile
 
 CMD [ "npm", "start" ]
