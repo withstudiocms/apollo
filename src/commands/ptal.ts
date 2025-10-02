@@ -49,8 +49,18 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
 
   const octokit = await useGitHub();
 
+	const requestURLInput = interaction.options.get("github", true).value as string;
   const description = interaction.options.get("description", true).value as string;
-  const pullRequestUrl = new URL(interaction.options.get("github", true).value as string);
+
+  if (!requestURLInput.startsWith("http")) {
+    await interaction.reply({
+      flags: [MessageFlags.Ephemeral],
+      content: "GitHub URL must include protocol."
+    });
+    return;
+  }
+
+  const pullRequestUrl = new URL(requestURLInput);
 
   if (pullRequestUrl.origin !== "https://github.com" || !pullRequestUrl.pathname.includes("/pull/")) {
     await interaction.reply({
@@ -87,7 +97,7 @@ const handler = async (interaction: ChatInputCommandInteraction) => {
         flags: [MessageFlags.Ephemeral],
         content: "Something went wrong while fetching the PR.",
       });
-  
+
       return;
     }
 
@@ -132,14 +142,14 @@ command
     option.setDescription("A link to the GitHub PR.");
     option.setMinLength(20); // Minimum of https://github.com/*
     option.setRequired(true);
-    
+
     return option;
   })
   .addStringOption((option) => {
     option.setName('description');
     option.setDescription('The message to send alongside the PTAL announcement. If none is given, the PR description is used.');
     option.setRequired(true);
-    
+
     return option;
   })
   .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers);
