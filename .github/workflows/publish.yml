@@ -57,12 +57,11 @@ jobs:
           echo "Pushed: ghcr.io/${{ github.repository_owner }}/apollo:${{ github.sha }}"
           echo "Pushed: ghcr.io/${{ github.repository_owner }}/apollo:${{ github.ref_name }}"
 
-    # Enable this once we are ready to deploy
-    #   - name: Deploy Web App
-    #     run: |
-    #       curl -X 'POST' \
-    #         "${{ secrets.DOKPLOY_URL }}/api/application.deploy" \
-    #         -H 'accept: application/json' \
-    #         -H "x-api-key: ${{ secrets.DOKPLOY_AUTH_TOKEN }}" \
-    #         -H 'Content-Type: application/json' \
-    #         -d '{"applicationId": "${{ secrets.DOKPLOY_WEB_APPLICATION_ID }}"}'
+      - name: Deploy Web App
+        run: |
+          curl -X 'POST' \
+            "${{ secrets.DOKPLOY_URL }}/api/application.deploy" \
+            -H 'accept: application/json' \
+            -H "x-api-key: ${{ secrets.DOKPLOY_AUTH_TOKEN }}" \
+            -H 'Content-Type: application/json' \
+            -d '{"applicationId": "${{ secrets.DOKPLOY_WEB_APPLICATION_ID }}"}'
