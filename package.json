@@ -1,14 +1,15 @@
 {
-	"name": "studiocms-bot",
+	"name": "@withstudiocms/apollo",
 	"version": "1.0.0",
-	"description": "",
+	"description": "Apollo is a fully-configurable Discord Bot that helps with managing Discord Servers for OSS projects.",
 	"type": "module",
 	"main": "index.js",
 	"scripts": {
-		"start": "pnpm exec tsx ./src/index.ts"
+		"start": "pnpm exec tsx ./src/index.ts",
+		"dev": "pnpm exec tsx --env-file=.env ./src/index.ts"
 	},
 	"keywords": [],
-	"author": "",
+	"author": "withstudiocms",
 	"license": "MIT",
 	"dependencies": {
 		"@libsql/client": "^0.14.0",
