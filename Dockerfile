@@ -13,7 +13,7 @@ RUN corepack enable pnpm
 RUN pnpm install --frozen-lockfile
 
 # Runtime
-FROM base AS runtime
+FROM base AS dockploy
 WORKDIR /home/node/app
 
 ENV DISCORD_APP_TOKEN=""
