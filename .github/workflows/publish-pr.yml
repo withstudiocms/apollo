@@ -46,7 +46,6 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/apollo:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/apollo:${{ github.ref_name }}
             ghcr.io/${{ github.repository_owner }}/apollo:pr-${{ github.event.pull_request.number }}
           cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/apollo:cache
           cache-to: type=inline
@@ -54,5 +53,4 @@ jobs:
       - name: Verify pushed image
         run: | 
           echo "Pushed: ghcr.io/${{ github.repository_owner }}/apollo:${{ github.sha }}"
-          echo "Pushed: ghcr.io/${{ github.repository_owner }}/apollo:${{ github.ref_name }}"
           echo "Pushed: ghcr.io/${{ github.repository_owner }}/apollo:pr-${{ github.event.pull_request.number }}"
