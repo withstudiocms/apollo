@@ -1,5 +1,0 @@
-services:
-  apollo:
-    build:
-      context: .
-      dockerfile: Dockerfile
