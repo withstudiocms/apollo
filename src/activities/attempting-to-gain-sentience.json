@@ -1,6 +1,0 @@
-{
-  "$schema": "../activities.schema.json",
-  "type": "custom",
-  "name": "Attempting to gain sentience",
-  "duration": 5
-}
